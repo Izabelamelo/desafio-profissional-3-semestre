@@ -5,10 +5,14 @@
 
 using namespace std;
 
+
+
 // Declaração da estrutura de dados do usuário
 struct Usuario {
     int id_usuario;
     string nome;
+    string usuario;
+    string senha;    
     int nivel_permissao;
     bool motorista;
     // Informações de motorista
@@ -57,6 +61,16 @@ struct DiarioBordo {
     int km_inicial;
     int km_final;
 };
+
+bool fazerLogin(const vector<Usuario>& usuarios, const string& usuario, const string& senha) {
+    for (int i = 0; i < usuarios.size(); i++) {
+        if (usuarios[i].usuario == usuario && usuarios[i].senha == senha) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // Declaração da função para adicionar usuários ao sistema
 void adicionarUsuario(vector<Usuario>& usuarios) {
@@ -283,14 +297,15 @@ void excluirVeiculo(vector<Veiculo>& veiculos) {
 
 // Função para consultar todos os veículos
 void consultarVeiculos(const vector<Veiculo>& veiculos) {
+   
     if (veiculos.empty()) {
         cout << "Nenhum veículo cadastrado.\n";
         return;
     }
 
     cout << "Veículos cadastrados:\n";
-    for (int i = 0; i < veiculos.size(); i++) {
-        const Veiculo& veiculo = veiculos[i];
+    Veiculo veiculo : veiculos
+    for (const Veiculo& veiculo : veiculos) {
         cout << "ID do veículo: " << veiculo.id_veiculo << endl;
         cout << "Tipo de combustível: " << veiculo.tipo_combustivel << endl;
         cout << "Chassi: " << veiculo.chassi << endl;
@@ -304,7 +319,6 @@ void consultarVeiculos(const vector<Veiculo>& veiculos) {
         cout << endl;
     }
 }
-
 
 // Função para adicionar diário de bordo
 void adicionarDiarioBordo(vector<DiarioBordo>& diariosBordo, const vector<Veiculo>& veiculos) {
@@ -382,52 +396,72 @@ void alterarDiarioBordo(vector<DiarioBordo>& diariosBordo) {
     cout << "Diário de bordo não encontrado.\n";
 }
 
-
 // Função para consultar um diário de bordo por veículo e data
 void consultarDiarioBordo(const vector<DiarioBordo>& diariosBordo) {
-	string id_veiculo, data;
-	bool encontrado = false;
-	cout << "Digite o código do veículo: ";
-	cin.ignore();
-	getline(cin, id_veiculo);
-	cout << "Digite a data da viagem (DD/MM/AAAA): ";
-	getline(cin, data);
-	for (int i = 0; i < diariosBordo.size(); i++) {
-  	  if (diariosBordo[i].id_veiculo != -1 && diariosBordo[i].data_viagem == data) {
-	        cout << "ID do diário: " << diariosBordo[i].id_diario << endl;
-	        cout << "Endereço da viagem: " << diariosBordo[i].endereco_viagem << endl;
-	        cout << "Descrição da viagem: " << diariosBordo[i].descricao_viagem << endl;
-	        cout << "Data da viagem: " << diariosBordo[i].data_viagem << endl;
-	        cout << "Horário inicial: " << diariosBordo[i].horario_inicial << endl;
-	        cout << "Horário final: " << diariosBordo[i].horario_final << endl;
-	        cout << "KM inicial: " << diariosBordo[i].km_inicial << endl;
-	        cout << "KM final: " << diariosBordo[i].km_final << endl;
-	        encontrado = true;
-	        break;
-	    }
-	}	
+    string placa_veiculo, data;
+    cout << "Digite a placa do veículo: ";
+    cin.ignore();
+    getline(cin, placa_veiculo);
+    cout << "Digite a data da viagem (DD/MM/AAAA): ";
+    getline(cin, data);
 
-	if (!encontrado) {
-	    cout << "Diário de bordo não encontrado.\n";
-	}
+    for (const DiarioBordo& diario : diariosBordo) {
+        if (diario.id_veiculo != -1 && diario.placa == placa_veiculo && diario.data_viagem == data) {
+            cout << "ID do diário: " << diario.id_diario << endl;
+            cout << "Endereço da viagem: " << diario.endereco_viagem << endl;
+            cout << "Descrição da viagem: " << diario.descricao_viagem << endl;
+            cout << "Data da viagem: " << diario.data_viagem << endl;
+            cout << "Horário inicial: " << diario.horario_inicial << endl;
+            cout << "Horário final: " << diario.horario_final << endl;
+            cout << "KM inicial: " << diario.km_inicial << endl;
+            cout << "KM final: " << diario.km_final << endl;
+            return;
+        }
+    }
+
+    cout << "Diário de bordo não encontrado.\n";
 }
-
 
 // Função principal para executar o programa
 int main() {
-    vector<Usuario> usuarios;
-    vector<Posto> postos;
-    vector<Veiculo> veiculos;
-    vector<DiarioBordo> diariosBordo;
+    vector<Usuario> usuarios = {
+        {1, "João", "joaob", "senha123", 1, true, 123, "01/01/1990", "A+", "1234567890", "123456789", "B", "Masculino"},
+        {2, "Maria", "mariab", "abc123", 2, false, 0, "", "", "", "", "", ""},
+        {3, "José", "jose", "1234", 1, true, 123, "01/01/1984", "A-", "1234786780", "453256789", "D", "Masculino"},
+    };
 
+    vector<Posto> postos;
     int opcao;
+        int tentativas = 0;
+    
+    while (tentativas < 3) {
+        string usuario, senha;
+        cout << "Digite o nome de usuário: ";
+        cin >> usuario;
+        cout << "Digite a senha: ";
+        cin >> senha;
+    
+        if (fazerLogin(usuarios, usuario, senha)) {
+            cout << "Login realizado com sucesso!" << endl;
+            break;
+        } else {
+            cout << "Login falhou. Usuário ou senha incorretos." << endl;
+            tentativas++;
+        }
+    }
+    
+    if (tentativas >= 3) {
+        cout << "Número máximo de tentativas excedido. Encerrando o programa." << endl;
+        return 0;
+    }
+    
     while (true) {
-        cout << "\n--- Autofleet - Controle de Frota de veículos da prefeitura ---\n"
+
+        cout << "\n--- Sistema de Controle de Transporte ---\n"
              << "Escolha uma opção:\n"
              << "1. Usuário\n"
              << "2. Posto\n"
              << "3. Veiculo\n"
-             << "4. Diario de bordo\n"
              << "0. Sair\n";
         cin >> opcao;
     
@@ -500,72 +534,13 @@ int main() {
                 }
             }
         }
-        else if (opcao==3) {
-            // Menu de opções veiculos
-            while (true) {
-                cout << "\n--- Menu de Veiculos ---\n"
-                     << "Escolha uma opção:\n"
-                     << "1. Cadastrar veiculo\n"
-                     << "2. Consulta - todos veiculos\n"
-                     << "3. Consultar veiculo\n"
-                     << "4. Excluir veiculo\n"
-                     << "0. Voltar\n";
-                cin >> opcao;
-    
-                if (opcao == 0) {
-                    break;
-                }
-                else if (opcao == 1) {
-                    adicionarVeiculo(veiculos);
-                }
-                else if (opcao == 2) {
-                    consultarVeiculos(veiculos);
-                }
-                else if (opcao == 3) {
-                    exibirInformacoesVeiculo(veiculos);
-                } 
-                else if (opcao == 4) {
-                    excluirVeiculo(veiculos);
-                } 				               
-                else {
-                    cout << "Opção inválida." << endl;
-                }
-		   }
-    	}
-		else if (opcao==4){
-			//menu de opcoes diario de bordo
-            while (true) {
-                cout << "\n--- Diario de bordo dos veiculos ---\n"
-                     << "Escolha uma opção:\n"
-                     << "1. Cadastrar novo diario de bordo\n"
-                     << "2. Alterar diario de bordo\n"
-                     << "3. Consultar diario de bordo\n"
-                     << "0. Voltar\n";
-                cin >> opcao;
-    
-                if (opcao == 0) {
-                    break;
-                }
-                else if (opcao == 1) {
-                    adicionarDiarioBordo(diariosBordo,veiculos);
-                }
-                else if (opcao == 2) {
-                    alterarDiarioBordo(diariosBordo);
-                }
-                else if (opcao == 3) {
-                    consultarDiarioBordo(diariosBordo);
-                }				               
-                else {
-                    cout << "Opção inválida." << endl;
-                }			
-	    	}
-		}
-		
-		
         else {
             cout << "Opção inválida." << endl;
         }
-    }
+        }
+
+    }   
+    return 0;
 }
 
 
